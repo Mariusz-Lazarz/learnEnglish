@@ -43,7 +43,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          command_timeoutL: 20m
+          command_timeout: 15m
+          debug: true
           script: |
             set -e
             export NVM_DIR="$HOME/.nvm"
