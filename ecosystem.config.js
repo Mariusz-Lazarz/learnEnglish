@@ -3,8 +3,9 @@ module.exports = {
     {
       name: "learn-english",
       script: "node_modules/.bin/next",
-      args: "start",
+      args: "start -p 3001",
       instances: 1,
+      exec_mode: "fork",
       env_production: {
         NODE_ENV: "production",
         PORT: 3001,
