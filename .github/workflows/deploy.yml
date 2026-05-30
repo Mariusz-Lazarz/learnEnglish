@@ -33,6 +33,7 @@ jobs:
     name: Deploy
     needs: check
     runs-on: ubuntu-latest
+    environment: CI
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Deploy to VPS
@@ -44,9 +45,11 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-            cd /srv/learn-english
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            cd /root/learnEnglish
             git pull
             npm ci
             npm run build
             pm2 reload ecosystem.config.js --update-env
-            curl -sf http://localhost:3000
+            curl -sf http://localhost:3001
