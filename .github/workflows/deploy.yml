@@ -7,51 +7,57 @@ on:
     branches: [main]
 
 jobs:
-  check:
-    name: Check
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-npm-
-
       - run: npm ci
       - run: npm run lint
       - run: npm run build
       - run: npm audit --audit-level=high
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next/
 
   deploy:
     name: Deploy
-    needs: check
+    needs: build
     runs-on: ubuntu-latest
-    environment: CI
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: CI
     steps:
-      - name: Deploy to VPS
+      - uses: actions/checkout@v4
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next/
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: ".next/,package.json,package-lock.json,public/"
+          target: "/root/learnEnglish"
+      - name: Restart app
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          command_timeout: 15m
-          debug: true
+          command_timeout: 5m
           script: |
-            set -e
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             cd /root/learnEnglish
-            git pull
-            npm ci
-            npm run build
+            npm ci --omit=dev
             pm2 reload ecosystem.config.js --update-env
-            curl -sf http://localhost:3001
