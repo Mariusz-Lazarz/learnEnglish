@@ -1,5 +1,8 @@
 'use client'
 
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import type { Lesson } from '@/db'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,6 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card'
+import { startSessionAction } from '@/app/actions/sessions'
 
 interface LessonCardProps {
   lesson: Lesson
@@ -18,6 +22,10 @@ interface LessonCardProps {
 }
 
 export function LessonCard({ lesson, onEdit, onDelete }: LessonCardProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [startError, setStartError] = useState<string | null>(null)
+
   return (
     <Card>
       <CardHeader>
@@ -32,24 +40,40 @@ export function LessonCard({ lesson, onEdit, onDelete }: LessonCardProps) {
           </p>
         )}
       </CardContent>
-      <CardFooter className="gap-2">
-        <Button
-          disabled
-          title="Coming soon"
-          size="sm"
-        >
-          Start conversation
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => onEdit(lesson)}>
-          Edit
-        </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(lesson.id, lesson.name)}
-        >
-          Delete
-        </Button>
+      <CardFooter className="flex flex-col items-start gap-2">
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            disabled={isPending}
+            onClick={() => {
+              setStartError(null)
+              startTransition(async () => {
+                const result = await startSessionAction(lesson.id)
+                if ('sessionId' in result) {
+                  router.push('/session/' + result.sessionId)
+                } else {
+                  setStartError(result.error)
+                }
+              })
+            }}
+          >
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Start conversation
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onEdit(lesson)}>
+            Edit
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onDelete(lesson.id, lesson.name)}
+          >
+            Delete
+          </Button>
+        </div>
+        {startError && (
+          <p className="text-destructive text-sm">{startError}</p>
+        )}
       </CardFooter>
     </Card>
   )
