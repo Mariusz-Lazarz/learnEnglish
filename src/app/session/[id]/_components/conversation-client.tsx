@@ -166,44 +166,14 @@ export function ConversationClient({
     }
   }, [sessionId, callChat, playTTS])
 
-  const runResumeAcknowledgment = useCallback(async () => {
-    if (!initialMessages || initialMessages.length === 0) return
-    setTurnState('processing')
-    try {
-      const contextMessages = buildAIContext(initialMessages, initialSummary ?? null)
-      const fullText = await callChat([
-        ...contextMessages,
-        { role: 'user', content: 'Resume our previous conversation.' },
-      ])
-      await playTTS(fullText, () => setStreamingText(fullText))
-
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: fullText,
-        timestamp: new Date().toISOString(),
-      }
-      const updated = [...initialMessages, assistantMessage]
-      setStreamingText('')
-      setMessages(updated)
-      void saveTranscriptAction(sessionId, updated)
-      setTurnState('idle')
-    } catch (err) {
-      setTurnState('error')
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to resume conversation.')
-    }
-  }, [sessionId, initialMessages, initialSummary, callChat, playTTS])
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingText])
 
   const runInitialTurn = useCallback(async () => {
-    if (initialMessages && initialMessages.length > 0) {
-      await runResumeAcknowledgment()
-    } else {
-      await runAIGreeting()
-    }
-  }, [initialMessages, runAIGreeting, runResumeAcknowledgment])
+    if (initialMessages && initialMessages.length > 0) return
+    await runAIGreeting()
+  }, [initialMessages, runAIGreeting])
 
   useEffect(() => {
     if (greetingRanRef.current) return
@@ -390,12 +360,16 @@ export function ConversationClient({
       </div>
 
       {/* Bottom controls */}
-      <div className="py-4 border-t shrink-0 flex justify-center">
+      <div className="py-4 border-t shrink-0 flex flex-col items-center gap-2">
         <Button
           size="lg"
-          className={`rounded-full w-16 h-16 ${turnState === 'recording' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+          className={`rounded-full w-16 h-16 select-none touch-none ${turnState === 'recording' ? 'bg-red-600 hover:bg-red-700' : ''}`}
           disabled={turnState === 'processing' || turnState === 'error'}
-          onClick={turnState === 'recording' ? stopRecording : startRecording}
+          onMouseDown={() => { if (turnState === 'idle') void startRecording() }}
+          onMouseUp={() => { if (turnState === 'recording') void stopRecording() }}
+          onMouseLeave={() => { if (turnState === 'recording') void stopRecording() }}
+          onTouchStart={(e) => { e.preventDefault(); if (turnState === 'idle') void startRecording() }}
+          onTouchEnd={(e) => { e.preventDefault(); if (turnState === 'recording') void stopRecording() }}
         >
           {turnState === 'recording' ? (
             <MicOff className="h-6 w-6" />
@@ -403,6 +377,9 @@ export function ConversationClient({
             <Mic className="h-6 w-6" />
           )}
         </Button>
+        <span className="text-xs text-muted-foreground">
+          {turnState === 'recording' ? 'Release to send' : 'Hold to speak'}
+        </span>
       </div>
     </div>
   )
