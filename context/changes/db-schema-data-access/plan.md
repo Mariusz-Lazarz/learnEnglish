@@ -295,29 +295,29 @@ None in this change. DAL integration testing is part of the feature slices that 
 
 #### Automated
 
-- [x] 1.1 npm install succeeds with no peer-dep conflicts
-- [x] 1.2 npm run typecheck exits 0
-- [x] 1.3 npm run db:generate produces db/migrations/0000_*.sql
-- [x] 1.4 Generated SQL contains 3 CREATE TABLE statements
+- [x] 1.1 npm install succeeds with no peer-dep conflicts — 9e71939
+- [x] 1.2 npm run typecheck exits 0 — 9e71939
+- [x] 1.3 npm run db:generate produces db/migrations/0000_*.sql — 9e71939
+- [x] 1.4 Generated SQL contains 3 CREATE TABLE statements — 9e71939
 
 #### Manual
 
-- [x] 1.5 Generated SQL matches schema design (columns, types, FKs, UNIQUE on transcripts.session_id)
-- [x] 1.6 npm run db:migrate exits 0 against VPS database; \dt confirms 3 tables
+- [x] 1.5 Generated SQL matches schema design (columns, types, FKs, UNIQUE on transcripts.session_id) — 9e71939
+- [x] 1.6 npm run db:migrate exits 0 against VPS database; \dt confirms 3 tables — 9e71939
 
 ### Phase 2: Typed data-access layer
 
 #### Automated
 
-- [ ] 2.1 npm run typecheck exits 0
-- [ ] 2.2 npm run lint exits 0
-- [ ] 2.3 No `any` type in src/db/queries/ (grep check)
+- [x] 2.1 npm run typecheck exits 0
+- [x] 2.2 npm run lint exits 0
+- [x] 2.3 No `any` type in src/db/queries/ (grep check)
 
 #### Manual
 
-- [ ] 2.4 Lessons round-trip via test script (create, read, delete)
-- [ ] 2.5 Sessions/transcripts round-trip via test script (createSession, saveTranscript, getTranscriptMessages)
-- [ ] 2.6 Free-conversation session shows lessonName: null in SessionWithLesson
+- [x] 2.4 Lessons round-trip via test script (create, read, delete)
+- [x] 2.5 Sessions/transcripts round-trip via test script (createSession, saveTranscript, getTranscriptMessages)
+- [x] 2.6 Free-conversation session shows lessonName: null in SessionWithLesson
 
 ### Phase 3: Wire migration into the deploy pipeline
 
