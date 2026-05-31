@@ -5,7 +5,9 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const blob = formData.get('audio') as Blob;
-    const file = new File([blob], 'audio.webm', { type: blob.type || 'audio/webm' });
+    const type = blob.type || 'audio/webm';
+    const ext = type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm';
+    const file = new File([blob], `audio.${ext}`, { type });
 
     const result = await openai.audio.transcriptions.create({
       file,

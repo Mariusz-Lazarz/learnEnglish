@@ -211,11 +211,17 @@ export function ConversationClient({
     void runInitialTurn()
   }, [runInitialTurn])
 
+  function getSupportedMimeType(): string {
+    const candidates = ['audio/webm', 'audio/mp4', 'audio/ogg']
+    return candidates.find((t) => MediaRecorder.isTypeSupported(t)) ?? ''
+  }
+
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       chunksRef.current = []
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      const mimeType = getSupportedMimeType()
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
       recorder.ondataavailable = (e) => chunksRef.current.push(e.data)
       recorder.start()
       mediaRecorderRef.current = recorder
@@ -231,7 +237,7 @@ export function ConversationClient({
     if (!recorder) return
 
     const audioBlob = await new Promise<Blob>((resolve) => {
-      recorder.onstop = () => resolve(new Blob(chunksRef.current, { type: 'audio/webm' }))
+      recorder.onstop = () => resolve(new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' }))
       recorder.stop()
       recorder.stream.getTracks().forEach((t) => t.stop())
     })
