@@ -83,7 +83,6 @@ export function ConversationClient({
         fullText += decoder.decode(value, { stream: true })
         setStreamingText(fullText)
       }
-      setStreamingText('')
 
       await playTTS(fullText)
 
@@ -93,6 +92,7 @@ export function ConversationClient({
         timestamp: new Date().toISOString(),
       }
       const updated = [greetingMessage]
+      setStreamingText('')
       setMessages(updated)
       void saveTranscriptAction(sessionId, updated)
       setTurnState('idle')
@@ -151,6 +151,7 @@ export function ConversationClient({
         ...currentMessages,
         { role: 'user', content: transcript, timestamp: new Date().toISOString() },
       ]
+      setMessages(nextMessages)
 
       const chatRes = await fetch('/api/chat', {
         method: 'POST',
@@ -174,7 +175,6 @@ export function ConversationClient({
         fullText += decoder.decode(value, { stream: true })
         setStreamingText(fullText)
       }
-      setStreamingText('')
 
       await playTTS(fullText)
 
@@ -182,6 +182,7 @@ export function ConversationClient({
         ...nextMessages,
         { role: 'assistant', content: fullText, timestamp: new Date().toISOString() },
       ]
+      setStreamingText('')
       setMessages(updated)
       void saveTranscriptAction(sessionId, updated)
       setTurnState('idle')
