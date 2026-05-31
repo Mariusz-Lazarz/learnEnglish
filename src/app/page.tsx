@@ -1,6 +1,8 @@
 import { getAllLessons } from '@/db'
 import { LessonList } from './_components/lesson-list'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const lessons = await getAllLessons()
 
