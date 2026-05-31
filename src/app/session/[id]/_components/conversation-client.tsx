@@ -23,6 +23,7 @@ interface ConversationClientProps {
   sessionId: string
   lessonName: string
   systemPrompt: string
+  initialMessages?: Message[]
 }
 
 type TurnState = 'idle' | 'recording' | 'processing' | 'error'
@@ -31,9 +32,10 @@ export function ConversationClient({
   sessionId,
   lessonName,
   systemPrompt,
+  initialMessages,
 }: ConversationClientProps) {
   const router = useRouter()
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? [])
   const [turnState, setTurnState] = useState<TurnState>('idle')
   const [streamingText, setStreamingText] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -102,15 +104,71 @@ export function ConversationClient({
     }
   }, [sessionId, systemPrompt, playTTS])
 
+  const runResumeAcknowledgment = useCallback(async () => {
+    if (!initialMessages || initialMessages.length === 0) return
+    setTurnState('processing')
+    try {
+      const chatRes = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            ...initialMessages.map(({ role, content }) => ({ role, content })),
+            { role: 'user', content: 'Resume our previous conversation.' },
+          ],
+          systemPrompt,
+        }),
+      })
+      if (!chatRes.ok) throw new Error(`Chat error ${chatRes.status}`)
+      if (!chatRes.body) throw new Error('No response body')
+
+      const reader = chatRes.body.getReader()
+      const decoder = new TextDecoder()
+      let fullText = ''
+      setStreamingText('')
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        fullText += decoder.decode(value, { stream: true })
+        setStreamingText(fullText)
+      }
+
+      await playTTS(fullText)
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: fullText,
+        timestamp: new Date().toISOString(),
+      }
+      const updated = [...initialMessages, assistantMessage]
+      setStreamingText('')
+      setMessages(updated)
+      void saveTranscriptAction(sessionId, updated)
+      setTurnState('idle')
+    } catch (err) {
+      setTurnState('error')
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to resume conversation.')
+    }
+  }, [sessionId, systemPrompt, initialMessages, playTTS])
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingText])
 
+  const runInitialTurn = useCallback(async () => {
+    if (initialMessages && initialMessages.length > 0) {
+      await runResumeAcknowledgment()
+    } else {
+      await runAIGreeting()
+    }
+  }, [initialMessages, runAIGreeting, runResumeAcknowledgment])
+
   useEffect(() => {
     if (greetingRanRef.current) return
     greetingRanRef.current = true
-    void runAIGreeting()
-  }, [runAIGreeting])
+    void runInitialTurn()
+  }, [runInitialTurn])
 
   async function startRecording() {
     try {

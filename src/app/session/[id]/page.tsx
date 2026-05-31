@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { getSessionById, getLessonById } from '@/db'
+import { getSessionById, getLessonById, getTranscriptMessages } from '@/db'
 import { buildSystemPrompt, FREE_CONVERSATION_SYSTEM_PROMPT } from '@/lib/system-prompt'
 import { ConversationClient } from './_components/conversation-client'
 
@@ -21,6 +21,7 @@ export default async function SessionPage({ params }: PageProps) {
 
   const lesson = session.lessonId ? await getLessonById(session.lessonId) : null
   const systemPrompt = lesson ? buildSystemPrompt(lesson) : FREE_CONVERSATION_SYSTEM_PROMPT
+  const priorMessages = await getTranscriptMessages(session.id)
 
   return (
     <main>
@@ -28,6 +29,7 @@ export default async function SessionPage({ params }: PageProps) {
         sessionId={session.id}
         lessonName={lesson?.name ?? 'Free conversation'}
         systemPrompt={systemPrompt}
+        initialMessages={priorMessages.length > 0 ? priorMessages : undefined}
       />
     </main>
   )
