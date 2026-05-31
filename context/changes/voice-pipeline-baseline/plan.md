@@ -281,51 +281,51 @@ No database changes. No schema migration required. Env-only change on the VPS.
 
 #### Automated
 
-- [x] 1.1 npm install exits 0 with no peer-dep conflicts
-- [x] 1.2 npm run typecheck exits 0
-- [x] 1.3 npm run lint exits 0
+- [x] 1.1 npm install exits 0 with no peer-dep conflicts — 06cba2c
+- [x] 1.2 npm run typecheck exits 0 — 06cba2c
+- [x] 1.3 npm run lint exits 0 — 06cba2c
 
 #### Manual
 
-- [x] 1.4 package.json dependencies include ai, @ai-sdk/openai, openai
-- [x] 1.5 .env.production.example shows OPENAI_API_KEY as an active (uncommented) line
+- [x] 1.4 package.json dependencies include ai, @ai-sdk/openai, openai — 06cba2c
+- [x] 1.5 .env.production.example shows OPENAI_API_KEY as an active (uncommented) line — 06cba2c
 
 ### Phase 2: Three API routes
 
 #### Automated
 
-- [x] 2.1 npm run typecheck exits 0 with all three route files present
-- [x] 2.2 npm run lint exits 0
+- [x] 2.1 npm run typecheck exits 0 with all three route files present — 06cba2c
+- [x] 2.2 npm run lint exits 0 — 06cba2c
 
 #### Manual
 
-- [x] 2.3 curl /api/chat returns SSE data lines
-- [x] 2.4 curl /api/tts returns valid MPEG audio bytes
-- [x] 2.5 /api/transcribe tested via test page in Phase 3
+- [x] 2.3 curl /api/chat returns SSE data lines — 06cba2c
+- [x] 2.4 curl /api/tts returns valid MPEG audio bytes — 06cba2c
+- [x] 2.5 /api/transcribe tested via test page in Phase 3 — 06cba2c
 
 ### Phase 3: Minimal test page
 
 #### Automated
 
-- [x] 3.1 npm run typecheck exits 0
-- [x] 3.2 npm run lint exits 0
-- [x] 3.3 npm run build exits 0
+- [x] 3.1 npm run typecheck exits 0 — 06cba2c
+- [x] 3.2 npm run lint exits 0 — 06cba2c
+- [x] 3.3 npm run build exits 0 — 06cba2c
 
 #### Manual
 
-- [x] 3.4 /pipeline-test loads in Chrome with no console errors
-- [x] 3.5 Full voice loop works: record → transcript → streaming LLM text → audio plays
-- [x] 3.6 Latency display shows time from stop to audio start
-- [x] 3.7 Second turn demonstrates multi-turn context (AI acknowledges prior message)
+- [x] 3.4 /pipeline-test loads in Chrome with no console errors — 06cba2c
+- [x] 3.5 Full voice loop works: record → transcript → streaming LLM text → audio plays — 06cba2c
+- [x] 3.6 Latency display shows time from stop to audio start — 06cba2c
+- [x] 3.7 Second turn demonstrates multi-turn context (AI acknowledges prior message) — 06cba2c
 
 ### Phase 4: VPS deploy and NFR verification
 
 #### Automated
 
-- [ ] 4.1 CI pipeline passes on push to main (lint, build, audit, deploy steps all exit 0)
+- [x] 4.1 CI pipeline passes on push to main (lint, build, audit, deploy steps all exit 0)
 
 #### Manual
 
 - [x] 4.2 OPENAI_API_KEY present in /root/learnEnglish/.env.production on VPS
-- [ ] 4.3 /pipeline-test accessible at production URL
-- [ ] 4.4 Three consecutive voice loops on VPS all complete in <3s (time from Stop to first audio)
+- [x] 4.3 /pipeline-test accessible at production URL
+- [x] 4.4 Three consecutive voice loops on VPS all complete in <3s (time from Stop to first audio)
