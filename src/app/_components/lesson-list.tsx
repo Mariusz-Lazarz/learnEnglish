@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import type { Lesson } from '@/db'
 import { Button } from '@/components/ui/button'
 import { LessonCard } from './lesson-card'
@@ -18,7 +19,10 @@ export function LessonList({ lessons }: LessonListProps) {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex justify-end gap-2">
+        <Button variant="outline" asChild>
+          <Link href="/sessions">Past sessions</Link>
+        </Button>
         <Button onClick={() => setIsCreateOpen(true)}>New lesson</Button>
       </div>
 
