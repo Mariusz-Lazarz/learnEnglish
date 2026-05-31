@@ -7,6 +7,7 @@ export type Session = typeof sessions.$inferSelect;
 
 export type SessionWithLesson = Session & {
   lessonName: string | null;
+  messageCount: number;
 };
 
 export async function getAllSessions(): Promise<SessionWithLesson[]> {
@@ -17,9 +18,29 @@ export async function getAllSessions(): Promise<SessionWithLesson[]> {
       startedAt: sessions.startedAt,
       endedAt: sessions.endedAt,
       lessonName: lessons.name,
+      messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
     })
     .from(sessions)
     .leftJoin(lessons, eq(sessions.lessonId, lessons.id))
+    .leftJoin(transcripts, eq(transcripts.sessionId, sessions.id))
+    .orderBy(desc(sessions.startedAt));
+  return rows.map((r) => ({ ...r, lessonName: r.lessonName ?? null }));
+}
+
+export async function getAllEndedSessions(): Promise<SessionWithLesson[]> {
+  const rows = await db
+    .select({
+      id: sessions.id,
+      lessonId: sessions.lessonId,
+      startedAt: sessions.startedAt,
+      endedAt: sessions.endedAt,
+      lessonName: lessons.name,
+      messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
+    })
+    .from(sessions)
+    .leftJoin(lessons, eq(sessions.lessonId, lessons.id))
+    .leftJoin(transcripts, eq(transcripts.sessionId, sessions.id))
+    .where(sql`${sessions.endedAt} IS NOT NULL`)
     .orderBy(desc(sessions.startedAt));
   return rows.map((r) => ({ ...r, lessonName: r.lessonName ?? null }));
 }
@@ -32,9 +53,11 @@ export async function getSessionById(id: string): Promise<SessionWithLesson | un
       startedAt: sessions.startedAt,
       endedAt: sessions.endedAt,
       lessonName: lessons.name,
+      messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
     })
     .from(sessions)
     .leftJoin(lessons, eq(sessions.lessonId, lessons.id))
+    .leftJoin(transcripts, eq(transcripts.sessionId, sessions.id))
     .where(eq(sessions.id, id));
   if (!rows[0]) return undefined;
   return { ...rows[0], lessonName: rows[0].lessonName ?? null };
