@@ -309,15 +309,15 @@ None in this change. DAL integration testing is part of the feature slices that 
 
 #### Automated
 
-- [x] 2.1 npm run typecheck exits 0
-- [x] 2.2 npm run lint exits 0
-- [x] 2.3 No `any` type in src/db/queries/ (grep check)
+- [x] 2.1 npm run typecheck exits 0 — 300ae5f
+- [x] 2.2 npm run lint exits 0 — 300ae5f
+- [x] 2.3 No `any` type in src/db/queries/ (grep check) — 300ae5f
 
 #### Manual
 
-- [x] 2.4 Lessons round-trip via test script (create, read, delete)
-- [x] 2.5 Sessions/transcripts round-trip via test script (createSession, saveTranscript, getTranscriptMessages)
-- [x] 2.6 Free-conversation session shows lessonName: null in SessionWithLesson
+- [x] 2.4 Lessons round-trip via test script (create, read, delete) — 300ae5f
+- [x] 2.5 Sessions/transcripts round-trip via test script (createSession, saveTranscript, getTranscriptMessages) — 300ae5f
+- [x] 2.6 Free-conversation session shows lessonName: null in SessionWithLesson — 300ae5f
 
 ### Phase 3: Wire migration into the deploy pipeline
 
