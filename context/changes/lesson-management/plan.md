@@ -330,8 +330,8 @@ No schema changes in this slice — F-01 already covers the `lessons` table.
 
 #### Manual
 
-- [ ] 1.3 `src/components/ui/` contains all 8 component files and `src/lib/utils.ts` exists
-- [ ] 1.4 No Tailwind/CSS compilation errors in browser console on `npm run dev`
+- [x] 1.3 `src/components/ui/` contains all 8 component files and `src/lib/utils.ts` exists
+- [x] 1.4 No Tailwind/CSS compilation errors in browser console on `npm run dev`
 
 ### Phase 2: Server actions for lesson mutations
 
@@ -349,21 +349,21 @@ No schema changes in this slice — F-01 already covers the `lessons` table.
 
 #### Manual
 
-- [ ] 3.3 Home page renders without console errors at `localhost:3000`
+- [x] 3.3 Home page renders without console errors at `localhost:3000`
 
 ### Phase 4: Client components
 
 #### Automated
 
-- [x] 4.1 `npm run typecheck` exits 0
-- [x] 4.2 `npm run lint` exits 0
-- [x] 4.3 `npm run build` exits 0
+- [x] 4.1 `npm run typecheck` exits 0 — 372a5a5
+- [x] 4.2 `npm run lint` exits 0 — 372a5a5
+- [x] 4.3 `npm run build` exits 0 — 372a5a5
 
 #### Manual
 
-- [ ] 4.4 Empty state renders correctly when DB has no lessons
-- [ ] 4.5 Create lesson: modal opens → fill fields → submit → lesson appears in list
-- [ ] 4.6 Edit lesson: modal pre-fills → change name → save → card reflects update
-- [ ] 4.7 Delete lesson: alert shows correct name → confirm → lesson removed
-- [ ] 4.8 "Start conversation" button visible and disabled on each card
-- [ ] 4.9 No browser console errors during any CRUD flow
+- [x] 4.4 Empty state renders correctly when DB has no lessons
+- [x] 4.5 Create lesson: modal opens → fill fields → submit → lesson appears in list
+- [x] 4.6 Edit lesson: modal pre-fills → change name → save → card reflects update
+- [x] 4.7 Delete lesson: alert shows correct name → confirm → lesson removed
+- [x] 4.8 "Start conversation" button visible and disabled on each card
+- [x] 4.9 No browser console errors during any CRUD flow
