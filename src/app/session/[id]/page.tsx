@@ -30,6 +30,7 @@ export default async function SessionPage({ params }: PageProps) {
         lessonName={lesson?.name ?? 'Free conversation'}
         systemPrompt={systemPrompt}
         initialMessages={priorMessages.length > 0 ? priorMessages : undefined}
+        initialSummary={session.rollingSummary ?? undefined}
       />
     </main>
   )

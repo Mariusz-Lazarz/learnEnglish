@@ -17,6 +17,7 @@ export async function getAllSessions(): Promise<SessionWithLesson[]> {
       lessonId: sessions.lessonId,
       startedAt: sessions.startedAt,
       endedAt: sessions.endedAt,
+      rollingSummary: sessions.rollingSummary,
       lessonName: lessons.name,
       messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
     })
@@ -34,6 +35,7 @@ export async function getAllEndedSessions(): Promise<SessionWithLesson[]> {
       lessonId: sessions.lessonId,
       startedAt: sessions.startedAt,
       endedAt: sessions.endedAt,
+      rollingSummary: sessions.rollingSummary,
       lessonName: lessons.name,
       messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
     })
@@ -52,6 +54,7 @@ export async function getSessionById(id: string): Promise<SessionWithLesson | un
       lessonId: sessions.lessonId,
       startedAt: sessions.startedAt,
       endedAt: sessions.endedAt,
+      rollingSummary: sessions.rollingSummary,
       lessonName: lessons.name,
       messageCount: sql<number>`COALESCE(jsonb_array_length(${transcripts.messages}), 0)`,
     })
@@ -73,6 +76,14 @@ export async function createSession(lessonId?: string): Promise<Session> {
 
 export async function endSession(id: string): Promise<void> {
   await db.update(sessions).set({ endedAt: new Date() }).where(eq(sessions.id, id));
+}
+
+export async function reopenSession(id: string): Promise<void> {
+  await db.update(sessions).set({ endedAt: null }).where(eq(sessions.id, id));
+}
+
+export async function updateSessionSummary(id: string, summary: string): Promise<void> {
+  await db.update(sessions).set({ rollingSummary: summary }).where(eq(sessions.id, id));
 }
 
 export async function deleteSession(id: string): Promise<void> {

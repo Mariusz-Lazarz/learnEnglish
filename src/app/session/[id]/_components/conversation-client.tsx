@@ -17,13 +17,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { saveTranscriptAction, endSessionAction } from '@/app/actions/sessions'
+import { saveTranscriptAction, endSessionAction, updateSummaryAction } from '@/app/actions/sessions'
+import { buildAIContext, SUMMARY_EVERY_N_MESSAGES } from '@/lib/context-window'
 
 interface ConversationClientProps {
   sessionId: string
   lessonName: string
   systemPrompt: string
   initialMessages?: Message[]
+  initialSummary?: string
 }
 
 type TurnState = 'idle' | 'recording' | 'processing' | 'error'
@@ -33,9 +35,11 @@ export function ConversationClient({
   lessonName,
   systemPrompt,
   initialMessages,
+  initialSummary,
 }: ConversationClientProps) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>(initialMessages ?? [])
+  const [rollingSummary, setRollingSummary] = useState<string | null>(initialSummary ?? null)
   const [turnState, setTurnState] = useState<TurnState>('idle')
   const [streamingText, setStreamingText] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -47,8 +51,26 @@ export function ConversationClient({
   const chunksRef = useRef<Blob[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const greetingRanRef = useRef(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const playTTS = useCallback(async (text: string) => {
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+        audioRef.current = null
+      }
+      if (mediaRecorderRef.current) {
+        if (mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop()
+        }
+        mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop())
+        mediaRecorderRef.current = null
+      }
+    }
+  }, [])
+
+  const playTTS = useCallback(async (text: string, onPlay?: () => void) => {
     const res = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,19 +79,54 @@ export function ConversationClient({
     if (!res.ok) throw new Error(`TTS error ${res.status}`)
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
-    await new Audio(url).play()
+    const audio = new Audio(url)
+    audioRef.current = audio
+    await new Promise<void>((resolve, reject) => {
+      audio.onplay = () => onPlay?.()
+      audio.onended = () => {
+        URL.revokeObjectURL(url)
+        audioRef.current = null
+        resolve()
+      }
+      audio.onerror = () => {
+        URL.revokeObjectURL(url)
+        audioRef.current = null
+        reject(new Error('Audio playback failed'))
+      }
+      audio.play().catch(reject)
+    })
   }, [])
 
-  const runAIGreeting = useCallback(async () => {
-    setTurnState('processing')
-    try {
+  // Generates a rolling summary when message count crosses the threshold.
+  // Called fire-and-forget after each turn that lands on the threshold.
+  const maybeRefreshSummary = useCallback(
+    async (allMessages: Message[], currentSummary: string | null) => {
+      if (allMessages.length === 0 || allMessages.length % SUMMARY_EVERY_N_MESSAGES !== 0) return
+      try {
+        const res = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: buildAIContext(allMessages, currentSummary),
+          }),
+        })
+        if (!res.ok) return
+        const { summary } = await res.json()
+        setRollingSummary(summary)
+        void updateSummaryAction(sessionId, summary)
+      } catch {
+        // non-critical; silently skip
+      }
+    },
+    [sessionId]
+  )
+
+  const callChat = useCallback(
+    async (contextMessages: { role: 'user' | 'assistant'; content: string }[]) => {
       const chatRes = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: 'Start' }],
-          systemPrompt,
-        }),
+        body: JSON.stringify({ messages: contextMessages, systemPrompt }),
       })
       if (!chatRes.ok) throw new Error(`Chat error ${chatRes.status}`)
       if (!chatRes.body) throw new Error('No response body')
@@ -77,16 +134,21 @@ export function ConversationClient({
       const reader = chatRes.body.getReader()
       const decoder = new TextDecoder()
       let fullText = ''
-      setStreamingText('')
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         fullText += decoder.decode(value, { stream: true })
-        setStreamingText(fullText)
       }
+      return fullText
+    },
+    [systemPrompt]
+  )
 
-      await playTTS(fullText)
+  const runAIGreeting = useCallback(async () => {
+    setTurnState('processing')
+    try {
+      const fullText = await callChat([{ role: 'user', content: 'Start' }])
+      await playTTS(fullText, () => setStreamingText(fullText))
 
       const greetingMessage: Message = {
         role: 'assistant',
@@ -102,39 +164,18 @@ export function ConversationClient({
       setTurnState('error')
       setErrorMessage(err instanceof Error ? err.message : 'Failed to get AI greeting.')
     }
-  }, [sessionId, systemPrompt, playTTS])
+  }, [sessionId, callChat, playTTS])
 
   const runResumeAcknowledgment = useCallback(async () => {
     if (!initialMessages || initialMessages.length === 0) return
     setTurnState('processing')
     try {
-      const chatRes = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            ...initialMessages.map(({ role, content }) => ({ role, content })),
-            { role: 'user', content: 'Resume our previous conversation.' },
-          ],
-          systemPrompt,
-        }),
-      })
-      if (!chatRes.ok) throw new Error(`Chat error ${chatRes.status}`)
-      if (!chatRes.body) throw new Error('No response body')
-
-      const reader = chatRes.body.getReader()
-      const decoder = new TextDecoder()
-      let fullText = ''
-      setStreamingText('')
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fullText += decoder.decode(value, { stream: true })
-        setStreamingText(fullText)
-      }
-
-      await playTTS(fullText)
+      const contextMessages = buildAIContext(initialMessages, initialSummary ?? null)
+      const fullText = await callChat([
+        ...contextMessages,
+        { role: 'user', content: 'Resume our previous conversation.' },
+      ])
+      await playTTS(fullText, () => setStreamingText(fullText))
 
       const assistantMessage: Message = {
         role: 'assistant',
@@ -150,7 +191,7 @@ export function ConversationClient({
       setTurnState('error')
       setErrorMessage(err instanceof Error ? err.message : 'Failed to resume conversation.')
     }
-  }, [sessionId, systemPrompt, initialMessages, playTTS])
+  }, [sessionId, initialMessages, initialSummary, callChat, playTTS])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -204,45 +245,23 @@ export function ConversationClient({
       const { transcript, error: sttErr } = await sttRes.json()
       if (sttErr) throw new Error(sttErr)
 
-      const currentMessages = messages
-      const nextMessages: Message[] = [
-        ...currentMessages,
-        { role: 'user', content: transcript, timestamp: new Date().toISOString() },
-      ]
-      setMessages(nextMessages)
+      const userMessage: Message = { role: 'user', content: transcript, timestamp: new Date().toISOString() }
+      const withUser = [...messages, userMessage]
+      setMessages(withUser)
 
-      const chatRes = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: nextMessages.map(({ role, content }) => ({ role, content })),
-          systemPrompt,
-        }),
-      })
-      if (!chatRes.ok) throw new Error(`Chat error ${chatRes.status}`)
-      if (!chatRes.body) throw new Error('No response body')
+      const contextMessages = buildAIContext(withUser, rollingSummary)
+      const fullText = await callChat(contextMessages)
 
-      const reader = chatRes.body.getReader()
-      const decoder = new TextDecoder()
-      let fullText = ''
-      setStreamingText('')
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fullText += decoder.decode(value, { stream: true })
-        setStreamingText(fullText)
-      }
-
-      await playTTS(fullText)
+      await playTTS(fullText, () => setStreamingText(fullText))
 
       const updated: Message[] = [
-        ...nextMessages,
+        ...withUser,
         { role: 'assistant', content: fullText, timestamp: new Date().toISOString() },
       ]
       setStreamingText('')
       setMessages(updated)
       void saveTranscriptAction(sessionId, updated)
+      void maybeRefreshSummary(updated, rollingSummary)
       setTurnState('idle')
     } catch (err) {
       setTurnState('error')
@@ -253,7 +272,7 @@ export function ConversationClient({
   async function handleEndSession() {
     setIsEnding(true)
     setEndError(null)
-    const result = await endSessionAction(sessionId, messages)
+    const result = await endSessionAction(sessionId)
     if (result?.error) {
       setEndError(result.error)
       setIsEnding(false)

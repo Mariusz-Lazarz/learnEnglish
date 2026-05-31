@@ -25,6 +25,7 @@ export const sessions = pgTable('sessions', {
   lessonId: uuid('lesson_id').references(() => lessons.id, { onDelete: 'set null' }),
   startedAt: tstz('started_at').notNull().defaultNow(),
   endedAt: tstz('ended_at'),
+  rollingSummary: text('rolling_summary'),
 });
 
 export const transcripts = pgTable(

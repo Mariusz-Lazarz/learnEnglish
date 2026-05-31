@@ -1,7 +1,15 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createSession, saveTranscript, endSession, deleteSession, getSessionById, getTranscriptMessages } from '@/db'
+import {
+  createSession,
+  saveTranscript,
+  endSession,
+  deleteSession,
+  getSessionById,
+  reopenSession,
+  updateSessionSummary,
+} from '@/db'
 import type { Message } from '@/db'
 
 export async function startSessionAction(
@@ -26,12 +34,21 @@ export async function saveTranscriptAction(
   }
 }
 
-export async function endSessionAction(
+export async function updateSummaryAction(
   sessionId: string,
-  messages: Message[]
+  summary: string
+): Promise<void> {
+  try {
+    await updateSessionSummary(sessionId, summary)
+  } catch {
+    // fire-and-forget
+  }
+}
+
+export async function endSessionAction(
+  sessionId: string
 ): Promise<{ error: string } | undefined> {
   try {
-    await saveTranscript(sessionId, messages)
     await endSession(sessionId)
   } catch {
     return { error: 'Failed to end session. Please try again.' }
@@ -50,17 +67,13 @@ export async function deleteSessionAction(
 }
 
 export async function resumeSessionAction(
-  oldSessionId: string
-): Promise<{ newSessionId: string } | { error: string }> {
+  sessionId: string
+): Promise<{ sessionId: string } | { error: string }> {
   try {
-    const oldSession = await getSessionById(oldSessionId)
-    if (!oldSession) return { error: 'Session not found' }
-    const priorMessages = await getTranscriptMessages(oldSessionId)
-    const newSession = await createSession(oldSession.lessonId ?? undefined)
-    if (priorMessages.length > 0) {
-      await saveTranscript(newSession.id, priorMessages)
-    }
-    return { newSessionId: newSession.id }
+    const session = await getSessionById(sessionId)
+    if (!session) return { error: 'Session not found' }
+    await reopenSession(sessionId)
+    return { sessionId }
   } catch {
     return { error: 'Failed to resume session. Please try again.' }
   }
