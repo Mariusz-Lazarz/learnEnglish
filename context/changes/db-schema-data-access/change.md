@@ -1,7 +1,7 @@
 ---
 change_id: db-schema-data-access
 title: Set up PostgreSQL schema and typed data-access layer
-status: implementing
+status: impl_reviewed
 created: 2026-05-31
 updated: 2026-05-31
 archived_at: null
