@@ -337,15 +337,15 @@ No schema changes in this slice — F-01 already covers the `lessons` table.
 
 #### Automated
 
-- [x] 2.1 `npm run typecheck` exits 0
-- [x] 2.2 `npm run lint` exits 0
+- [x] 2.1 `npm run typecheck` exits 0 — 1177e03
+- [x] 2.2 `npm run lint` exits 0 — 1177e03
 
 ### Phase 3: Home page (Server Component)
 
 #### Automated
 
-- [ ] 3.1 `npm run typecheck` exits 0
-- [ ] 3.2 `npm run build` exits 0
+- [x] 3.1 `npm run typecheck` exits 0
+- [x] 3.2 `npm run build` exits 0
 
 #### Manual
 
