@@ -1,17 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 import { createLesson, updateLesson, deleteLesson } from '@/db'
-
-export const lessonSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  subject: z.string().min(1, 'Subject is required'),
-  conversationGoal: z.string().min(1, 'Conversation goal is required'),
-  vocabulary: z.string().optional(),
-})
-
-type LessonFormData = z.infer<typeof lessonSchema>
+import { lessonSchema, type LessonFormData } from '@/lib/lesson-schema'
 
 export async function createLessonAction(
   data: LessonFormData

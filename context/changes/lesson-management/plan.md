@@ -344,8 +344,8 @@ No schema changes in this slice — F-01 already covers the `lessons` table.
 
 #### Automated
 
-- [x] 3.1 `npm run typecheck` exits 0
-- [x] 3.2 `npm run build` exits 0
+- [x] 3.1 `npm run typecheck` exits 0 — 750d588
+- [x] 3.2 `npm run build` exits 0 — 750d588
 
 #### Manual
 
@@ -355,9 +355,9 @@ No schema changes in this slice — F-01 already covers the `lessons` table.
 
 #### Automated
 
-- [ ] 4.1 `npm run typecheck` exits 0
-- [ ] 4.2 `npm run lint` exits 0
-- [ ] 4.3 `npm run build` exits 0
+- [x] 4.1 `npm run typecheck` exits 0
+- [x] 4.2 `npm run lint` exits 0
+- [x] 4.3 `npm run build` exits 0
 
 #### Manual
 
