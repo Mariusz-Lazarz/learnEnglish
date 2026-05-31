@@ -322,10 +322,10 @@ No database changes. No schema migration required. Env-only change on the VPS.
 
 #### Automated
 
-- [x] 4.1 CI pipeline passes on push to main (lint, build, audit, deploy steps all exit 0)
+- [x] 4.1 CI pipeline passes on push to main (lint, build, audit, deploy steps all exit 0) — c94b877
 
 #### Manual
 
-- [x] 4.2 OPENAI_API_KEY present in /root/learnEnglish/.env.production on VPS
-- [x] 4.3 /pipeline-test accessible at production URL
-- [x] 4.4 Three consecutive voice loops on VPS all complete in <3s (time from Stop to first audio)
+- [x] 4.2 OPENAI_API_KEY present in /root/learnEnglish/.env.production on VPS — c94b877
+- [x] 4.3 /pipeline-test accessible at production URL — c94b877
+- [x] 4.4 Three consecutive voice loops on VPS all complete in <3s (time from Stop to first audio) — c94b877
