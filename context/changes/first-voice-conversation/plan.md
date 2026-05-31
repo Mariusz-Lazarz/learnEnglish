@@ -397,9 +397,9 @@ No schema changes. No new migration files.
 
 #### Automated
 
-- [x] 4.1 npm run typecheck exits 0
-- [x] 4.2 npm run lint exits 0
-- [x] 4.3 npm run build exits 0
+- [x] 4.1 npm run typecheck exits 0 — aaa3949
+- [x] 4.2 npm run lint exits 0 — aaa3949
+- [x] 4.3 npm run build exits 0 — aaa3949
 
 #### Manual
 
