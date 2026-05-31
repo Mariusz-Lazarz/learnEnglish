@@ -1,7 +1,7 @@
 ---
 change_id: session-library-resume
 title: Session library — view, delete, and resume past sessions
-status: implementing
+status: implemented
 created: 2026-05-31
 updated: 2026-05-31
 archived_at: null

@@ -287,8 +287,8 @@ if (initialMessages && initialMessages.length > 0) {
 
 #### Automated
 
-- [x] 1.1 TypeScript compiles without errors: `npm run build`
-- [x] 1.2 Lint passes: `npm run lint`
+- [x] 1.1 TypeScript compiles without errors: `npm run build` — 88aa339
+- [x] 1.2 Lint passes: `npm run lint` — 88aa339
 
 #### Manual
 
@@ -299,8 +299,8 @@ if (initialMessages && initialMessages.length > 0) {
 
 #### Automated
 
-- [x] 2.1 TypeScript compiles without errors: `npm run build`
-- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.1 TypeScript compiles without errors: `npm run build` — db79c30
+- [x] 2.2 Lint passes: `npm run lint` — db79c30
 
 #### Manual
 
@@ -315,8 +315,8 @@ if (initialMessages && initialMessages.length > 0) {
 
 #### Automated
 
-- [x] 3.1 TypeScript compiles without errors: `npm run build`
-- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 TypeScript compiles without errors: `npm run build` — acb14c2
+- [x] 3.2 Lint passes: `npm run lint` — acb14c2
 
 #### Manual
 
