@@ -360,8 +360,8 @@ No schema changes. No new migration files.
 
 #### Automated
 
-- [x] 1.1 npm run typecheck exits 0
-- [x] 1.2 npm run lint exits 0
+- [x] 1.1 npm run typecheck exits 0 — f84e4f4
+- [x] 1.2 npm run lint exits 0 — f84e4f4
 
 #### Manual
 
@@ -372,8 +372,8 @@ No schema changes. No new migration files.
 
 #### Automated
 
-- [ ] 2.1 npm run typecheck exits 0
-- [ ] 2.2 npm run lint exits 0
+- [x] 2.1 npm run typecheck exits 0
+- [x] 2.2 npm run lint exits 0
 
 #### Manual
 
