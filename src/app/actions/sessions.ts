@@ -5,7 +5,7 @@ import { createSession, saveTranscript, endSession, deleteSession, getSessionByI
 import type { Message } from '@/db'
 
 export async function startSessionAction(
-  lessonId: string
+  lessonId?: string
 ): Promise<{ sessionId: string } | { error: string }> {
   try {
     const session = await createSession(lessonId)
