@@ -46,9 +46,11 @@ export async function updateSummaryAction(
 }
 
 export async function endSessionAction(
-  sessionId: string
+  sessionId: string,
+  messages: Message[]
 ): Promise<{ error: string } | undefined> {
   try {
+    await saveTranscript(sessionId, messages)
     await endSession(sessionId)
   } catch {
     return { error: 'Failed to end session. Please try again.' }

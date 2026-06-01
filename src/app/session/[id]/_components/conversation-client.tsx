@@ -248,7 +248,7 @@ export function ConversationClient({
   async function handleEndSession() {
     setIsEnding(true)
     setEndError(null)
-    const result = await endSessionAction(sessionId)
+    const result = await endSessionAction(sessionId, messages)
     if (result?.error) {
       setEndError(result.error)
       setIsEnding(false)

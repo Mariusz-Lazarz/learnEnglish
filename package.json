@@ -6,6 +6,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev": "next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=512' next build",
     "start": "next start",
@@ -40,11 +42,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.8",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }
