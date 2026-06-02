@@ -362,6 +362,7 @@ export function ConversationClient({
       {/* Bottom controls */}
       <div className="py-4 border-t shrink-0 flex flex-col items-center gap-2">
         <Button
+          aria-label={turnState === 'recording' ? 'Release to send' : 'Hold to speak'}
           size="lg"
           className={`rounded-full w-16 h-16 select-none touch-none ${turnState === 'recording' ? 'bg-red-600 hover:bg-red-700' : ''}`}
           disabled={turnState === 'processing' || turnState === 'error'}

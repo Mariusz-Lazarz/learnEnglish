@@ -27,7 +27,7 @@ export function LessonCard({ lesson, onEdit, onDelete }: LessonCardProps) {
   const [startError, setStartError] = useState<string | null>(null)
 
   return (
-    <Card>
+    <Card role="article" aria-label={lesson.name}>
       <CardHeader>
         <CardTitle>{lesson.name}</CardTitle>
         <CardDescription>{lesson.subject}</CardDescription>
