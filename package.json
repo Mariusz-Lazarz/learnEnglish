@@ -8,6 +8,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:all": "vitest run && playwright test",
     "dev": "next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=512' next build",
     "start": "next start",
